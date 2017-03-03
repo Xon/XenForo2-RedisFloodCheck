@@ -28,7 +28,7 @@ class FloodCheck extends XFCP_FloodCheck
             return parent::checkFlooding($action, $userId, $floodingLimit);
         }
         $useLua = method_exists($cache, 'useLua') && $cache->useLua();
-        $key = Cm_Cache_Backend_Redis::PREFIX_KEY . $cache->getOption('cache_id_prefix') . 'flood.'.strval($action).'.'.strval($userId);
+        $key = $this->app->config['cache']['namespace'] . '[flood]['.strval($action).']['.strval($userId).']';
 
         // the key just needs to exist, not have any value
         if ($useLua)
