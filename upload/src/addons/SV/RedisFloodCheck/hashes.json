@@ -1,5 +1,0 @@
-{
-    "src/addons/SV/RedisFloodCheck/addon.json": "40e466a2053dfa5af084cb8cf0c9ac77b157871eb79f4011314dde687bdde3f2",
-    "src/addons/SV/RedisFloodCheck/XF/Service/FloodCheck.php": "2a5df82ba1f4d45e619f428328f252619edebae61464da4dd2a1a82aa978a006",
-    "src/addons/SV/RedisFloodCheck/_data/class_extensions.xml": "4a91e96ca3f1d79a587d9e03d6d39554672c73f102556c85f6ced8f6d1cd0e51"
-}

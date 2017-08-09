@@ -1,2 +1,3 @@
-*.zip
-*.bak
+addon-*.zip
+_releases
+hashes.json
