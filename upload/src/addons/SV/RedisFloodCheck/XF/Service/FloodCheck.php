@@ -28,7 +28,7 @@ class FloodCheck extends XFCP_FloodCheck
             return parent::checkFlooding($action, $userId, $floodingLimit);
         }
         $useLua = method_exists($cache, 'useLua') && $cache->useLua();
-        $key = $this->app->config['cache']['namespace'] . '[flood]['.strval($action).']['.strval($userId).']';
+        $key = $cache->getNamespacedId('flood_'.strval($action).'_'.strval($userId));
 
         // the key just needs to exist, not have any value
         if ($useLua)
