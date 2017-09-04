@@ -1,0 +1,6 @@
+{
+    "from_class": "XF\\Service\\FloodCheck",
+    "to_class": "SV\\RedisFloodCheck\\XF\\Service\\FloodCheck",
+    "execute_order": 1,
+    "active": true
+}
