@@ -2,6 +2,8 @@
 
 namespace SV\RedisFloodCheck\XF\Service;
 
+use SV\RedisCache\Redis;
+
 class FloodCheck extends XFCP_FloodCheck
 {
     const LUA_SETTTL_SH1 = 'b670e66199af96236f9798dd1152e61c312d4f78';
@@ -22,12 +24,14 @@ class FloodCheck extends XFCP_FloodCheck
 			return 0;
 		}
 
-        $cache = $this->app->cache();
-        if (!$cache || !method_exists($cache, 'getCredis') || !($credis = $cache->getCredis($cache)))
+        $app = $this->app;
+        /** @var Redis $cache */
+        $cache = $app->cache();
+        if (!($cache instanceof Redis) || !($credis = $cache->getCredis(false)))
         {
             return parent::checkFlooding($action, $userId, $floodingLimit);
         }
-        $useLua = method_exists($cache, 'useLua') && $cache->useLua();
+        $useLua = $cache->useLua();
         $key = $cache->getNamespacedId('flood_'.strval($action).'_'.strval($userId));
 
         // the key just needs to exist, not have any value
@@ -52,9 +56,9 @@ class FloodCheck extends XFCP_FloodCheck
         {
             if (!$credis->set($key, '', array('nx', 'ex'=> $floodingLimit)))
             {
-                return 0;
+                return $credis->ttl($key);
             }
-            $seconds = $credis->ttl($key);
+            return 0;
         }
         // seconds can return negative due to an error, treat that as requiring flooding
         return max(1, $seconds);
