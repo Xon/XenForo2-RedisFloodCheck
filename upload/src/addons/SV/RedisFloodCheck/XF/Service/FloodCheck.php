@@ -47,17 +47,20 @@ class FloodCheck extends XFCP_FloodCheck
                     "return 0 ";
                 $seconds = $credis->eval($script, array($key), array($floodingLimit));
             }
-            if ($seconds === 0)
-            {
-                return 0;
-            }
         }
         else
         {
             if (!$credis->set($key, '', array('nx', 'ex'=> $floodingLimit)))
             {
-                return $credis->ttl($key);
+                $seconds = $credis->ttl($key);
             }
+            else
+            {
+                $seconds = 0;
+            }
+        }
+        if ($seconds <= 0)
+        {
             return 0;
         }
         // seconds can return negative due to an error, treat that as requiring flooding
