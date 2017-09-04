@@ -10,7 +10,7 @@
     "support_url": "https://xenforo.com/community/resources/redis-flood-check.5564/",
     "extra_urls": [],
     "require" : {
-        "SV/RedisCache" : [2000000, "Redis Cache"],
+        "SV/RedisCache" : [2000000, "Redis Cache v2.0.0"],
         "php": ["5.6.0", "PHP 5.6.0+"]
     },
     "icon": ""
