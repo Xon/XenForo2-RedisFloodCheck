@@ -6,7 +6,14 @@ use SV\RedisCache\Redis;
 
 class FloodCheck extends XFCP_FloodCheck
 {
-    const LUA_SETTTL_SH1 = 'b670e66199af96236f9798dd1152e61c312d4f78';
+    /** @var string  */
+    const LUA_SHA1_SET_OR_GET_TTL = 'b670e66199af96236f9798dd1152e61c312d4f78';
+    /** @var string  */
+    const LUA_SCRIPT_SET_OR_GET_TTL =
+        "if not redis.call('SET', KEYS[1], '', 'NX', 'EX', ARGV[1]) then " .
+        "return redis.call('TTL', KEYS[1]) " .
+        "end " .
+        "return 0 ";
 
     public function checkFlooding($action, $userId, $floodingLimit = null)
     {
@@ -37,14 +44,10 @@ class FloodCheck extends XFCP_FloodCheck
         // the key just needs to exist, not have any value
         if ($useLua)
         {
-            $seconds = $credis->evalSha(self::LUA_SETTTL_SH1, array($key), array($floodingLimit));
+            $seconds = $credis->evalSha(static::LUA_SHA1_SET_OR_GET_TTL, array($key), array($floodingLimit));
             if ($seconds === null)
             {
-                $script =
-                    "if not redis.call('SET', KEYS[1], '', 'NX', 'EX', ARGV[1]) then ".
-                        "return redis.call('TTL', KEYS[1]) ".
-                    "end ".
-                    "return 0 ";
+                $script = static::LUA_SCRIPT_SET_OR_GET_TTL;
                 $seconds = $credis->eval($script, array($key), array($floodingLimit));
             }
         }
