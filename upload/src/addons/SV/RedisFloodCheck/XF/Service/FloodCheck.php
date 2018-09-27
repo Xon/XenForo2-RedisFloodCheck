@@ -70,7 +70,7 @@ class FloodCheck extends XFCP_FloodCheck
                 $seconds = 0;
             }
         }
-        if ($seconds <= 0)
+        if ($seconds === 0)
         {
             return 0;
         }
