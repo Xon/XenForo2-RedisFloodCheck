@@ -23,8 +23,8 @@ class FloodCheck extends XFCP_FloodCheck
      */
     public function checkFlooding($action, $userId, $floodingLimit = null)
     {
-        $action = strval($action);
-        $userId = intval($userId);
+        $action = \strval($action);
+        $userId = \intval($userId);
         if (!$userId)
         {
             return 0;
@@ -33,7 +33,7 @@ class FloodCheck extends XFCP_FloodCheck
         {
             $floodingLimit = $this->app->options()->floodCheckLength;
         }
-        $floodingLimit = intval($floodingLimit);
+        $floodingLimit = \intval($floodingLimit);
         if ($floodingLimit <= 0)
         {
             return 0;
@@ -47,7 +47,7 @@ class FloodCheck extends XFCP_FloodCheck
             return parent::checkFlooding($action, $userId, $floodingLimit);
         }
         $useLua = $cache->useLua();
-        $key = $cache->getNamespacedId('flood_' . strval($action) . '_' . strval($userId));
+        $key = $cache->getNamespacedId('flood_' . \strval($action) . '_' . \strval($userId));
 
         // the key just needs to exist, not have any value
         if ($useLua)
