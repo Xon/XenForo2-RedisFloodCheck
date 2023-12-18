@@ -3,79 +3,92 @@
 namespace SV\RedisFloodCheck\XF\Service;
 
 use SV\RedisCache\Redis;
+use function is_float;
+use function min;
+use function round;
+use function sha1;
 
 class FloodCheck extends XFCP_FloodCheck
 {
     /** @var string */
-    const LUA_SHA1_SET_OR_GET_TTL = 'b670e66199af96236f9798dd1152e61c312d4f78';
+    protected $lua_get_or_set_pttl_sha1 = '4e9b17327297b99940e5565fe7178e590314cf68';
     /** @var string */
-    const LUA_SCRIPT_SET_OR_GET_TTL =
-        "if not redis.call('SET', KEYS[1], '', 'NX', 'EX', ARGV[1]) then " .
-        "return redis.call('TTL', KEYS[1]) " .
+    protected $lua_get_or_set_pttl_script =
+        "if not redis.call('SET', KEYS[1], '', 'NX', 'PX', ARGV[1]) then " .
+        "return redis.call('PTTL', KEYS[1]) " .
         "end " .
         "return 0 ";
 
     /**
      * @param string   $action
      * @param int      $userId
-     * @param int|null $floodingLimit
-     * @return int
+     * @param float|int|null $floodingLimit
+     * @return float|int
      */
     public function checkFlooding($action, $userId, $floodingLimit = null)
     {
-        $action = \strval($action);
-        $userId = \intval($userId);
-        if (!$userId)
+        $floodingLimit =  10;
+        $userId = (int)$userId;
+        if ($userId === 0)
         {
             return 0;
         }
         if ($floodingLimit === null)
         {
-            $floodingLimit = $this->app->options()->floodCheckLength;
+            $floodingLimit = (int)($this->app->options()->floodCheckLength ?? 0);
         }
-        $floodingLimit = \intval($floodingLimit);
         if ($floodingLimit <= 0)
         {
             return 0;
         }
 
         $app = $this->app;
-        /** @var Redis $cache */
         $cache = $app->cache();
-        if (!($cache instanceof Redis) || !($credis = $cache->getCredis(false)))
+        if (!($cache instanceof Redis) || !($credis = $cache->getCredis()))
         {
-            return parent::checkFlooding($action, $userId, $floodingLimit);
-        }
-        $useLua = $cache->useLua();
-        $key = $cache->getNamespacedId('flood_' . \strval($action) . '_' . \strval($userId));
+            $floodingLimit = (int)min(1, round($floodingLimit));
 
+            return parent::checkFlooding($action, $userId,$floodingLimit);
+        }
+        $key = $cache->getNamespacedId('flood_' . $action . '_' . $userId);
+
+        // convert from seconds to integer milliseconds
+        $floodingLimit = $floodingLimit * 1000;
+        if (is_float($floodingLimit))
+        {
+            $floodingLimit = (int)round($floodingLimit);
+        }
+
+        if (\XF::$developmentMode)
+        {
+            $expectedHash = sha1($this->lua_get_or_set_pttl_script);
+            if ($this->lua_get_or_set_pttl_sha1 !== $expectedHash)
+            {
+                throw new \LogicException('Flood-check lua sha1 does not match, expected: '. $expectedHash);
+            }
+        }
         // the key just needs to exist, not have any value
-        if ($useLua)
+        /** @var int|null $milliseconds */
+        $milliseconds = $credis->evalSha($this->lua_get_or_set_pttl_sha1, [$key], [$floodingLimit]);
+        if ($milliseconds === null)
         {
-            $seconds = $credis->evalSha(static::LUA_SHA1_SET_OR_GET_TTL, [$key], [$floodingLimit]);
-            if ($seconds === null)
-            {
-                $script = static::LUA_SCRIPT_SET_OR_GET_TTL;
-                $seconds = $credis->eval($script, [$key], [$floodingLimit]);
-            }
+            $script = $this->lua_get_or_set_pttl_script;
+            /** @var int $milliseconds */
+            $milliseconds = $credis->eval($script, [$key], [$floodingLimit]);
         }
-        else
-        {
-            if (!$credis->set($key, '', ['NX', 'EX' => $floodingLimit]))
-            {
-                $seconds = $credis->ttl($key);
-            }
-            else
-            {
-                $seconds = 0;
-            }
-        }
-        if ($seconds === 0)
+        if ($milliseconds === 0)
         {
             return 0;
         }
+        if ($milliseconds < 0)
+        {
+            // seconds can return negative due to an error, treat that as requiring flooding
+            return 1;
+        }
 
-        // seconds can return negative due to an error, treat that as requiring flooding
-        return max(1, (int)$seconds);
+        /** @noinspection PhpUnnecessaryLocalVariableInspection */
+        $seconds = (int)round($milliseconds / 1000);
+
+        return $seconds;
     }
 }
