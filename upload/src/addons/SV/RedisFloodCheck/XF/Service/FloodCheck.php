@@ -27,7 +27,6 @@ class FloodCheck extends XFCP_FloodCheck
      */
     public function checkFlooding($action, $userId, $floodingLimit = null)
     {
-        $floodingLimit =  10;
         $userId = (int)$userId;
         if ($userId === 0)
         {
