@@ -3,16 +3,27 @@
     "title": "Redis backed flood checking",
     "description": "Use redis for new-content flood checking than MySQL",
     "version_string": "2.1.0",
-    "version_id": 2010000,
-    "dev" : "Xon",
+    "version_id": 1702926258,
+    "dev": "Xon",
     "dev_url": "https://atelieraphelion.com/",
     "faq_url": "",
     "support_url": "https://xenforo.com/community/resources/redis-flood-check.5564/",
-    "extra_urls": [],
-    "require" : {
-        "SV/RedisCache" : [2000000, "Redis Cache v2.0.0"],
-        "XF": [2020070, "XenForo 2.2.0+"],
-        "php": ["7.2.0", "PHP 7.2.0+"]
+    "extra_urls": {
+        "Add-on site": "https://atelieraphelion.com/products/redis-flood-check.193/"
+    },
+    "require": {
+        "SV/RedisCache": [
+            2000000,
+            "Redis Cache v2.0.0"
+        ],
+        "XF": [
+            2020070,
+            "XenForo 2.2.0+"
+        ],
+        "php": [
+            "7.2.0",
+            "PHP 7.2.0+"
+        ]
     },
     "icon": ""
 }
