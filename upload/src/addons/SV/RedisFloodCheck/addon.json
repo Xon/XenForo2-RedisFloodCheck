@@ -3,7 +3,7 @@
     "title": "Redis backed flood checking",
     "description": "Use redis for new-content flood checking than MySQL",
     "version_string": "2.2.0",
-    "version_id": 1711301258,
+    "version_id": 1711302288,
     "dev": "Xon",
     "dev_url": "https://atelieraphelion.com/",
     "faq_url": "",
