@@ -18,7 +18,7 @@ class Setup extends AbstractSetup
     use StepRunnerUpgradeTrait;
     use StepRunnerUninstallTrait;
 
-    public function checkRequirements(&$errors = [], &$warnings = [])
+    public function checkRequirements(&$errors = [], &$warnings = []): void
     {
         $cache = \XF::app()->cache();
         if (!($cache instanceof Redis) || !$cache->getCredis())

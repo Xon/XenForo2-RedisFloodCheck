@@ -2,7 +2,8 @@
 
 namespace SV\RedisFloodCheck\XF\Service;
 
-use SV\RedisCache\Redis;
+use SV\RedisCache\Repository\Redis as RedisRepo;
+
 use function is_float;
 use function min;
 use function round;
@@ -41,9 +42,9 @@ class FloodCheck extends XFCP_FloodCheck
             return 0;
         }
 
-        $app = $this->app;
-        $cache = $app->cache();
-        if (!($cache instanceof Redis) || !($credis = $cache->getCredis()))
+
+        $cache = RedisRepo::get()->getRedisConnector();
+        if ($cache === null || !($credis = $cache->getCredis()))
         {
             $floodingLimit = (int)min(1, round($floodingLimit));
 
