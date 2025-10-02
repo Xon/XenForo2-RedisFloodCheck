@@ -2,7 +2,7 @@
     "legacy_addon_id": "SV_RedisFloodCheck",
     "title": "Redis backed flood checking",
     "description": "Use redis for new-content flood checking than MySQL",
-    "version_string": "2.2.0",
+    "version_string": "2.3.0",
     "version_id": 1711302288,
     "dev": "Xon",
     "dev_url": "https://atelieraphelion.com/",
@@ -14,8 +14,8 @@
     },
     "require": {
         "SV/StandardLib": [
-            2001190100,
-            "Standard Library by Xon v1.19.0+"
+            2001220000,
+            "Standard Library by Xon v1.22.0+"
         ],
         "SV/RedisCache": [
             "2.17.0",

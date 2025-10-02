@@ -35,7 +35,7 @@ class FloodCheck extends XFCP_FloodCheck
         }
         if ($floodingLimit === null)
         {
-            $floodingLimit = (int)($this->app->options()->floodCheckLength ?? 0);
+            $floodingLimit = \XF::options()->floodCheckLength ?? 0;
         }
         if ($floodingLimit <= 0)
         {
