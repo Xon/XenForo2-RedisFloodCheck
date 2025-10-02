@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SV\RedisFloodCheck\XF\Service;
 
 use SV\RedisCache\Repository\Redis as RedisRepo;
@@ -24,7 +26,8 @@ class FloodCheck extends XFCP_FloodCheck
      * @param string   $action
      * @param int      $userId
      * @param float|int|null $floodingLimit
-     * @return float|int
+     * @return int
+     * @noinspection PhpMissingReturnTypeInspection
      */
     public function checkFlooding($action, $userId, $floodingLimit = null)
     {
@@ -42,11 +45,10 @@ class FloodCheck extends XFCP_FloodCheck
             return 0;
         }
 
-
         $cache = RedisRepo::get()->getRedisConnector();
         if ($cache === null || !($credis = $cache->getCredis()))
         {
-            $floodingLimit = (int)min(1, round($floodingLimit));
+            $floodingLimit = (int)min(1, (int)round($floodingLimit, 0, PHP_ROUND_HALF_UP));
 
             return parent::checkFlooding($action, $userId,$floodingLimit);
         }
@@ -56,7 +58,7 @@ class FloodCheck extends XFCP_FloodCheck
         $floodingLimit = $floodingLimit * 1000;
         if (is_float($floodingLimit))
         {
-            $floodingLimit = (int)round($floodingLimit);
+            $floodingLimit = (int)round($floodingLimit, 0, PHP_ROUND_HALF_UP);
         }
 
         if (\XF::$developmentMode)
@@ -73,8 +75,7 @@ class FloodCheck extends XFCP_FloodCheck
         if ($milliseconds === null)
         {
             $script = $this->lua_get_or_set_pttl_script;
-            /** @var int $milliseconds */
-            $milliseconds = $credis->eval($script, [$key], [$floodingLimit]);
+            $milliseconds = (int)$credis->eval($script, [$key], [$floodingLimit]);
         }
         if ($milliseconds === 0)
         {
@@ -87,7 +88,7 @@ class FloodCheck extends XFCP_FloodCheck
         }
 
         /** @noinspection PhpUnnecessaryLocalVariableInspection */
-        $seconds = (int)round($milliseconds / 1000);
+        $seconds = (int)round($milliseconds / 1000, 0, PHP_ROUND_HALF_UP);
 
         return $seconds;
     }
