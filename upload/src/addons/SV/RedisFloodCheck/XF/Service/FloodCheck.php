@@ -7,6 +7,7 @@ namespace SV\RedisFloodCheck\XF\Service;
 use SV\RedisCache\Repository\Redis as RedisRepo;
 
 use function is_float;
+use function is_int;
 use function min;
 use function round;
 use function sha1;
@@ -70,21 +71,25 @@ class FloodCheck extends XFCP_FloodCheck
             }
         }
         // the key just needs to exist, not have any value
-        /** @var int|null $milliseconds */
         $milliseconds = $credis->evalSha($this->lua_get_or_set_pttl_sha1, [$key], [$floodingLimit]);
         if ($milliseconds === null)
         {
             $script = $this->lua_get_or_set_pttl_script;
-            $milliseconds = (int)$credis->eval($script, [$key], [$floodingLimit]);
+            $milliseconds = $credis->eval($script, [$key], [$floodingLimit]);
         }
-        if ($milliseconds === 0)
+        if (is_float($milliseconds))
         {
-            return 0;
+            $milliseconds = (int)$milliseconds;
         }
-        if ($milliseconds < 0)
+        if (!is_int($milliseconds) || $milliseconds < 0)
         {
             // seconds can return negative due to an error, treat that as requiring flooding
             return 1;
+        }
+
+        if ($milliseconds === 0)
+        {
+            return 0;
         }
 
         /** @noinspection PhpUnnecessaryLocalVariableInspection */
