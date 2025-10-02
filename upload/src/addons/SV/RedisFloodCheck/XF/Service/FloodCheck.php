@@ -24,8 +24,8 @@ class FloodCheck extends XFCP_FloodCheck
         "return 0 ";
 
     /**
-     * @param string   $action
-     * @param int      $userId
+     * @param string         $action
+     * @param int            $userId
      * @param float|int|null $floodingLimit
      * @return int
      * @noinspection PhpMissingReturnTypeInspection
@@ -41,33 +41,33 @@ class FloodCheck extends XFCP_FloodCheck
         {
             $floodingLimit = \XF::options()->floodCheckLength ?? 0;
         }
+        else if (is_float($floodingLimit))
+        {
+            $floodingLimit = (int)min(1, (int)round($floodingLimit, 0, PHP_ROUND_HALF_UP));
+        }
         if ($floodingLimit <= 0)
         {
             return 0;
         }
 
+        /** @var int $floodingLimit */
+
         $cache = RedisRepo::get()->getRedisConnector();
         if ($cache === null || !($credis = $cache->getCredis()))
         {
-            $floodingLimit = (int)min(1, (int)round($floodingLimit, 0, PHP_ROUND_HALF_UP));
-
-            return parent::checkFlooding($action, $userId,$floodingLimit);
+            return parent::checkFlooding($action, $userId, $floodingLimit);
         }
         $key = $cache->getNamespacedId('flood_' . $action . '_' . $userId);
 
         // convert from seconds to integer milliseconds
         $floodingLimit = $floodingLimit * 1000;
-        if (is_float($floodingLimit))
-        {
-            $floodingLimit = (int)round($floodingLimit, 0, PHP_ROUND_HALF_UP);
-        }
 
         if (\XF::$developmentMode)
         {
             $expectedHash = sha1($this->lua_get_or_set_pttl_script);
             if ($this->lua_get_or_set_pttl_sha1 !== $expectedHash)
             {
-                throw new \LogicException('Flood-check lua sha1 does not match, expected: '. $expectedHash);
+                throw new \LogicException('Flood-check lua sha1 does not match, expected: ' . $expectedHash);
             }
         }
         // the key just needs to exist, not have any value
