@@ -45,12 +45,10 @@ class FloodCheck extends XFCP_FloodCheck
         {
             $floodingLimit = (int)min(1, (int)round($floodingLimit, 0, PHP_ROUND_HALF_UP));
         }
-        if ($floodingLimit <= 0)
+        if (!is_int($floodingLimit) || $floodingLimit <= 0)
         {
             return 0;
         }
-
-        /** @var int $floodingLimit */
 
         $cache = RedisRepo::get()->getRedisConnector();
         if ($cache === null || !($credis = $cache->getCredis()))
