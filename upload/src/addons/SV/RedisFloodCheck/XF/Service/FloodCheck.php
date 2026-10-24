@@ -8,7 +8,7 @@ use SV\RedisCache\Repository\Redis as RedisRepo;
 
 use function is_float;
 use function is_int;
-use function min;
+use function max;
 use function round;
 use function sha1;
 
@@ -43,7 +43,7 @@ class FloodCheck extends XFCP_FloodCheck
         }
         else if (is_float($floodingLimit))
         {
-            $floodingLimit = (int)min(1, (int)round($floodingLimit, 0, PHP_ROUND_HALF_UP));
+            $floodingLimit = (int)max(1, (int)round($floodingLimit, 0, PHP_ROUND_HALF_UP));
         }
         if (!is_int($floodingLimit) || $floodingLimit <= 0)
         {
